@@ -285,4 +285,19 @@ public class SessionTests(E2ETestFixture fixture, ITestOutputHelper output) : E2
         Assert.NotNull(assistantMessage);
         Assert.Contains("2", assistantMessage!.Data.Content);
     }
+
+    [Fact]
+    public async Task Should_Create_Session_With_Custom_Config_Dir()
+    {
+        var customConfigDir = Path.Combine(Ctx.HomeDir, "custom-config");
+        var session = await Client.CreateSessionAsync(new SessionConfig { ConfigDir = customConfigDir });
+
+        Assert.Matches(@"^[a-f0-9-]+$", session.SessionId);
+
+        // Session should work normally with custom config dir
+        await session.SendAsync(new MessageOptions { Prompt = "What is 1+1?" });
+        var assistantMessage = await TestHelper.GetFinalAssistantMessageAsync(session);
+        Assert.NotNull(assistantMessage);
+        Assert.Contains("2", assistantMessage!.Data.Content);
+    }
 }
